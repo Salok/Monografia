@@ -1,0 +1,10 @@
+//Bibliografía
+
+//3D graphics with pygame
+http://www.petercollingridge.co.uk/pygame-3d-graphics-tutorial
+
+//Neural Networks tutorial
+http://www.ai-junkie.com/ann/evolved/nnt1.html
+
+//Genetic Algorithms Tutorial
+http://www.ai-junkie.com/ga/intro/gat1.html
