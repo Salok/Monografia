@@ -10,6 +10,7 @@ import math
 #Importamos Vector3D porque los cuaterniones son vectores con un escalar.
 import Vector3D_Class as Vector3D
 
+
 #--------------------------------------------------------------#
 #					   Quaternion class                        #
 #--------------------------------------------------------------#
@@ -22,7 +23,7 @@ class Quaternion:
 
 	#Print y debug.
 	def __repr__(self):
-		return 'Escalar: %r' % (self.escalar) + Vector3D.Vector3D.__repr__(self.vector)
+		return 'Escalar: %r ' % (self.escalar) + Vector3D.Vector3D.__repr__(self.vector)
 
 	#Definimos las operaciones
 		#Suma de cuaterniones +=
@@ -40,7 +41,7 @@ class Quaternion:
 
 		#Conjugado de un cuaternion
 	def __neg__(self):
-		result = Quaternion(self.escalar, -self.vector)
+		result = Quaternion(self.escalar, -self.vector.x, -self.vector.y, -self.vector.z)
 		return result
 
 		#Resta de cuaterniones -=
@@ -80,19 +81,20 @@ class Quaternion:
 		result /= other
 		return result
 
-	#Definimos la multiplicación de cuaterniones. Q1 = a + v1; Q2 = w + v2; Q1 * Q2 = (a*w - v1 . v2) + (a*v1 + b*v2 + v1 x v2)
+	#Definimos la multiplicación de cuaterniones. Q1 = a + v1; Q2 = w + v2; Q1 * Q2 = (a*w - v1 . v2) + (b*v1 + a*v2 + v1 x v2)
 	def Mult(self, other):
-		result = Quaternion(self.escalar, self.vector.x, self.vector.y, self.vector.z)
-		result.escalar *= other.escalar  
-		result.escalar -= result.vector.Escalar(other.vector)
-		result.vector = (result.escalar * result.vector) + (other.escalar * other.vector) + (result.vector.Vectorial(other.vector))
+		result = Quaternion()
+		result.escalar = self.escalar * other.escalar - self.vector.Escalar(other.vector) 
+		result.vector = self.escalar * other.vector + other.escalar * self.vector + self.vector.Vectorial(other.vector)
 		return result
 
 	#Definimos la conjugación de cuaterniones. Q, P => Cuaterniones. Conjugación: P' = Q * P * Q^(-1)
 	#Esta operación es equivalente a rotar el vector P a lo largo de un eje un ángulo definido por Q.
 	def Conjugacion(self, other):
 		result = Quaternion() 
-		result += other * self * -other
+		other = other.Normalizar()
+		result = other.Mult(self)
+		result = result.Mult(-other)
 		return result
 
 	#Modulo de un cuaternion
@@ -105,33 +107,19 @@ class Quaternion:
 
 	#Crear un cuaternión de rotación definido por un ángulo y un vector de aplicación
 	def quatRotacion(self, angulo, (vx, vy, vz)):
-		self.escalar = math.cos(angulo)/2
-		self.vector = math.sin(angulo)/2 * Vector3D.Vector3D(vx, vy, vz)
+		self.escalar = round(math.cos(angulo/2), 3)
+		self.vector = round(math.sin(angulo/2), 3) * Vector3D.Vector3D(vx, vy, vz)
 		self.Normalizar()
 		return self
 
 #Test
 
 testQ = Quaternion()
-testQ = testQ.quatRotacion(2*math.pi/3, (1,1,1))
-testV = Quaternion(0,1,1,1)
-testW = Quaternion(0,0,0,1)
-print("Quaternions: \n")
-print(testQ)
-print(testV)
-print(testW)
-final = testW.Mult(testV)
-print("W * V \n")
-print(final)
-final = testV.Mult(testW)
-print("V * W \n")
-print(final)
-final = testV.Conjugacion(testQ)
-print("Conjugado de V y Q: V rotado 90 grados \n")
-print(final)
-final = testW.Conjugacion(testQ)
-print("Conjugado de W y Q: W rotado 90 grados \n")
-print(final)
+testQ = testQ.quatRotacion(math.pi/2, (1,1,1))
+Quat = Quaternion(0,0,0,1)
+Quat = Quat.Conjugacion(testQ)
+print(Quat)
+
 
 
 

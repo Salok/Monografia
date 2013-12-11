@@ -21,12 +21,12 @@ def Trasladar(dx, dy, dz):
 					 [0, 0, 1, 0],
 					 [dx,dy,dz,1]])
 
-#Crea una matriz de transformación que escala un punto en unos factores fx, fy y fz
-def Escalar(fx, fy, fz):
-	return np.array([[fx, 0, 0, 0],
-					 [0, fy, 0, 0],
-					 [0, 0, fz, 0],
-					 [0, 0, 0,  1]])
+#Crea una matriz de transformación que escala un punto en un factor f desde un centro cx, cy, cz
+def Escalar(f, cx, cy, cz):
+    return np.array([[f,0,0,0],
+                     [0,f,0,0],
+                     [0,0,f,0],
+                     [cx*(1-f), cy*(1-f), cz*(1-f), 1]])
 
 
 

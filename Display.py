@@ -107,8 +107,8 @@ class proyector:
 			objeto.Transformar(mat)
 
 		#Escalar.
-	def escalarObjetos(self, factores):
-		mat = matriz.Escalar(*factores)
+	def escalarObjetos(self, f, centro):
+		mat = matriz.Escalar(f, *centro)
 		for objeto in self.objetos.values():
 			objeto.Transformar(mat)
 
@@ -122,8 +122,8 @@ key_to_function = {
  pygame.K_RIGHT:(lambda x: x.trasladarObjetos([ 10, 0, 0])),
  pygame.K_DOWN: (lambda x: x.trasladarObjetos([0,  10, 0])),
  pygame.K_UP:   (lambda x: x.trasladarObjetos([0, -10, 0])),
- pygame.K_q:    (lambda x: x.escalarObjetos([2.0, 2.0, 0])),
- pygame.K_e:    (lambda x: x.escalarObjetos([0.8, 0.8, 0]))}
+ pygame.K_q:    (lambda x: x.escalarObjetos(2, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
+ pygame.K_e:    (lambda x: x.escalarObjetos(0.5, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0]))}
 
 cubo = Graph.Objeto3D()
 vertices = numpy.array([(x,y,z) for x in (50,250) for y in (50,250) for z in (50,250)])
