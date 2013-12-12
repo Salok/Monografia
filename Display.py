@@ -129,6 +129,7 @@ class proyector:
 			objeto.Alinear(centro)
 
 
+
 #Test: Display
 #Test: Cube
 #Test: Transformations
