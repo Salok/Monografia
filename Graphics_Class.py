@@ -7,6 +7,8 @@ from __future__ import print_function, division
 #Import Numpy para trabajar con matrices
 import numpy
 
+#Importamos los cuaterniones para rotar objetos
+import Quaternion_Class as Quat
 
 #--------------------------------------------------------------#
 #					   Objeto3D class                          #
@@ -35,8 +37,11 @@ class Objeto3D:
 
 	#Coge una lista de coordenadas y las transforma en vertices para añadir al objeto
 	def Vertices(self, listaVertices):
+		#Creamos una lista de unos
 		unoCol = numpy.ones((len(listaVertices), 1))
+		#La añadimos a la lista de coordenadas
 		add = numpy.hstack((listaVertices, unoCol))
+		#Añadimos la lista de coordenadas a la lista de vertices del objeto
 		self.vertices = numpy.vstack((self.vertices, add))
 
 	#Coge una lista de indices de vertices y las convierte en aristas para añadir al objeto
@@ -46,6 +51,13 @@ class Objeto3D:
 	#Aplicar una matriz de transformación
 	def Transformar(self, mat):
 		self.vertices = numpy.dot(self.vertices, mat)
+
+	#Rotar el objeto con un cuaternión
+	def Rotar(self, qRotacion):
+		#Aplicamos el cuaternión a cada uno de los vertices del objeto
+		for i, (x, y, z, _) in enumerate(self.vertices):
+			rotado = Quat.Quaternion(0, x, y, z).Conjugacion(qRotacion)
+			self.vertices[i] = [rotado.vector.x, rotado.vector.y, rotado.vector.z, 1]
 
 
 

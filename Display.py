@@ -8,6 +8,7 @@ from __future__ import print_function, division
 import pygame, numpy
 
 #Import mis módulos: Clase de vectores, clase de graficos y funciones de matrices
+import Quaternion_Class as Quat
 from Vector3D_Class import Vector3D
 import Graphics_Class as Graph
 import MatrizFunciones as matriz
@@ -112,18 +113,32 @@ class proyector:
 		for objeto in self.objetos.values():
 			objeto.Transformar(mat)
 
+		#Rotar
+	def rotarObjetos(self, angulo, vector):
+		#Creamos el cuaternion de rotación.
+		rotacion = Quat.Quaternion()
+		rotacion.quatRotacion(angulo, vector)
+
+		#Aplicamos el cuaternion a a cada objeto
+		for objeto in self.objetos.values():
+			objeto.Rotar(rotacion)
+
 
 
 #Test: Display
 #Test: Cube
 #Test: Transformations
 key_to_function = {
- pygame.K_LEFT: (lambda x: x.trasladarObjetos([-10, 0, 0])),
- pygame.K_RIGHT:(lambda x: x.trasladarObjetos([ 10, 0, 0])),
- pygame.K_DOWN: (lambda x: x.trasladarObjetos([0,  10, 0])),
- pygame.K_UP:   (lambda x: x.trasladarObjetos([0, -10, 0])),
- pygame.K_q:    (lambda x: x.escalarObjetos(2, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
- pygame.K_e:    (lambda x: x.escalarObjetos(0.5, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0]))}
+	pygame.K_LEFT: (lambda x: x.trasladarObjetos([-10, 0, 0])),
+	pygame.K_RIGHT:(lambda x: x.trasladarObjetos([ 10, 0, 0])),
+	pygame.K_DOWN: (lambda x: x.trasladarObjetos([0,  10, 0])),
+	pygame.K_UP:   (lambda x: x.trasladarObjetos([0, -10, 0])),
+	pygame.K_q:    (lambda x: x.escalarObjetos(2, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
+ 	pygame.K_e:    (lambda x: x.escalarObjetos(0.5, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
+ 	pygame.K_x:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
+ 	pygame.K_y:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
+ 	pygame.K_z:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1)))
+ }
 
 cubo = Graph.Objeto3D()
 vertices = numpy.array([(x,y,z) for x in (50,250) for y in (50,250) for z in (50,250)])

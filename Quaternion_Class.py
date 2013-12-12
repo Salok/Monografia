@@ -118,13 +118,6 @@ class Quaternion:
 		self.Normalizar()
 		return self
 
-#Test
-
-testQ = Quaternion()
-testQ = testQ.quatRotacion(math.pi/2, (1,1,1))
-Quat = Quaternion(0,0,0,1)
-Quat = Quat.Conjugacion(testQ)
-print(Quat)
 
 
 
