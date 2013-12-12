@@ -8,7 +8,7 @@ from __future__ import print_function, division
 import pygame, numpy
 
 #Import mis módulos: Clase de vectores, clase de graficos y funciones de matrices
-import Quaternion_Class as Quat
+from Quaternion_Class import Quaternion
 from Vector3D_Class import Vector3D
 import Graphics_Class as Graph
 import MatrizFunciones as matriz
@@ -116,13 +116,17 @@ class proyector:
 		#Rotar
 	def rotarObjetos(self, angulo, vector):
 		#Creamos el cuaternion de rotación.
-		rotacion = Quat.Quaternion()
+		rotacion = Quaternion()
 		rotacion.quatRotacion(angulo, vector)
 
 		#Aplicamos el cuaternion a a cada objeto
 		for objeto in self.objetos.values():
+			#Calculamos el centro del objeto antes de la rotación
+			centro = objeto.Centro()
 			objeto.Rotar(rotacion)
 
+			#Corregimos la traslacion provocada por la rotacion alineando con el centro anterion
+			objeto.Alinear(centro)
 
 
 #Test: Display
