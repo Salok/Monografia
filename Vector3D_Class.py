@@ -23,6 +23,13 @@ class Vector3D:
 	def __repr__(self):
 		return "x = %r, y = %r, z = %r" % (self.x, self.y, self.z)
 
+
+	#Definimos round para corregir los errores al trabajar con floats
+	def round(self, n):
+		self.x = round(self.x, n)
+		self.y = round(self.y, n)
+		self.z = round(self.z, n)
+		return self
 	#Definimos las operaciones
 		#Suma de vectores +=
 	def __iadd__(self, other):

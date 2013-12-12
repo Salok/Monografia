@@ -25,6 +25,11 @@ class Quaternion:
 	def __repr__(self):
 		return 'Escalar: %r ' % (self.escalar) + Vector3D.Vector3D.__repr__(self.vector)
 
+	#Definimos round para corregir los errores al usar floats. 
+	def round(self, n):
+		self.escalar = round(self.escalar, n)
+		self.vector = self.vector.round(n)
+		return self
 	#Definimos las operaciones
 		#Suma de cuaterniones +=
 	def __iadd__(self, other):
@@ -84,8 +89,8 @@ class Quaternion:
 	#Definimos la multiplicación de cuaterniones. Q1 = a + v1; Q2 = w + v2; Q1 * Q2 = (a*w - v1 . v2) + (b*v1 + a*v2 + v1 x v2)
 	def Mult(self, other):
 		result = Quaternion()
-		result.escalar = self.escalar * other.escalar - self.vector.Escalar(other.vector) 
-		result.vector = self.escalar * other.vector + other.escalar * self.vector + self.vector.Vectorial(other.vector)
+		result.escalar = self.escalar * other.escalar - (self.vector.Escalar(other.vector))
+		result.vector = self.escalar * other.vector + other.escalar * self.vector + (self.vector.Vectorial(other.vector))
 		return result
 
 	#Definimos la conjugación de cuaterniones. Q, P => Cuaterniones. Conjugación: P' = Q * P * Q^(-1)
@@ -95,6 +100,7 @@ class Quaternion:
 		other = other.Normalizar()
 		result = other.Mult(self)
 		result = result.Mult(-other)
+		result = result.round(5)
 		return result
 
 	#Modulo de un cuaternion
