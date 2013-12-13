@@ -80,7 +80,14 @@ class proyector:
 
 	#Añadimos un nuevo objeto con nombre para poder tratarlo individualmente.
 	def nuevoObjeto(self, nombre, objeto):
-		self.objetos[nombre] = objeto
+		if(nombre not in self.objetos.keys())
+				self.objetos[nombre] = objeto
+
+	#Añadimos los objetos de un sistema de objetos
+	def nuevoSisObjetos(self, sistema):
+		for nombre, objeto in sistema.objetos.itervalues():
+			self.nuevoObjeto(nombre, objeto)
+
 
 	#Funcion que dibuja los objetos del diccionario
 	def dibObjetos(self):

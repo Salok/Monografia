@@ -100,6 +100,31 @@ class Objeto3D:
 			alineado = punto + dist
 			self.vertices[i] = [alineado.x, alineado.y, alineado.z, 1]
 
+
+#Sistema de objetos. Todos los objetos de un sistema se consideran uno único al realizar las transformaciones
+class Sistema3D:
+	#Constructor
+	def __init__(self, ID):
+		self.ID = ID
+		self.objetos = {}
+
+	#Representación en string de la clase. Para print y debuggear
+	def __repr__(self):
+		debug = 'Soy el sistema %r. Estoy compuesto por los objetos: \n' % (self.ID)
+		for nombre, objeto in self.objetos.iteritems():
+			debug += ('Objeto %r: ' % (nombre) + Objeto3D.__repr__(objeto))
+			debug += '\n'
+
+		return debug
+
+	#Añadimos un nuevo objeto al sistema si no lo tenemos ya
+	def nuevoObjeto(self, nombre, objeto):
+		if (nombre not in self.objetos.keys())
+			self.objetos[nombre] = objeto
+
+
+
+
 #--------------------------------------------------------------#
 #					   Formas básicas                          #
 #--------------------------------------------------------------#
@@ -141,9 +166,9 @@ def Esferoide((x, y, z), (rx, ry, rz), res = 15):
 	#Plano horizontal. Centro en x, y, z. Dimensiones: dx, dz. Resolucion: Res
 def PlanoHorizontal((x,y,z), (dx,dz), Res):
 	grid = Objeto3D()
-	grid.Vertices([[x+n1*dx, y, z+n2*dz] for n1 in range(Res+1) for n2 in range(Res+1)])
-	grid.Aristas([(n1*(Res+1)+n2,n1*(Res+1)+n2+1) for n1 in range(Res+1) for n2 in range(Res)])
-	grid.Aristas([(n1*(Res+1)+n2,(n1+1)*(Res+1)+n2) for n1 in range(Res) for n2 in range(Res+1)])
+	grid.Vertices([[x+n1*dx, y, z+n2*dz] for n1 in xrange(Res+1) for n2 in xrange(Res+1)])
+	grid.Aristas([(n1*(Res+1)+n2,n1*(Res+1)+n2+1) for n1 in xrange(Res+1) for n2 in xrange(Res)])
+	grid.Aristas([(n1*(Res+1)+n2,(n1+1)*(Res+1)+n2) for n1 in xrange(Res) for n2 in xrange(Res+1)])
 	return grid
 
 
