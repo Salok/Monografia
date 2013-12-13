@@ -16,7 +16,7 @@ import MatrizFunciones as matriz
 #Parametros para WorldParams
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
-DIBUJAR_VERTICES = True
+DIBUJAR_VERTICES = False
 DIBUJAR_ARISTAS = True
 COLOR_VERTICES = (255, 255, 255)
 COLOR_ARISTAS = (200, 200, 200)
@@ -73,6 +73,7 @@ class proyector:
 					if event.key in key_to_function.keys():
 						key_to_function[event.key](self)
 
+			#self.rotarObjetos(numpy.pi/180, (1,1,1))
 			self.pantalla.fill(self.colorFondo)
 			self.dibObjetos()
 			pygame.display.flip()
@@ -125,7 +126,7 @@ class proyector:
 			centro = objeto.Centro()
 			objeto.Rotar(rotacion)
 
-			#Corregimos la traslacion provocada por la rotacion alineando con el centro anterion
+			#Corregimos la traslacion provocada por la rotacion alineando con el centro anterior
 			objeto.Alinear(centro)
 
 
@@ -140,17 +141,29 @@ key_to_function = {
 	pygame.K_UP:   (lambda x: x.trasladarObjetos([0, -10, 0])),
 	pygame.K_q:    (lambda x: x.escalarObjetos(2, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
  	pygame.K_e:    (lambda x: x.escalarObjetos(0.5, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
- 	pygame.K_x:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
- 	pygame.K_y:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
- 	pygame.K_z:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1)))
+ 	pygame.K_a:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
+ 	pygame.K_s:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
+ 	pygame.K_d:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1))),
+ 	 pygame.K_z:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
+ 	pygame.K_x:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
+ 	pygame.K_c:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1)))
  }
 
-cubo = Graph.Objeto3D()
+'''cubo = Graph.Objeto3D()
 vertices = numpy.array([(x,y,z) for x in (50,250) for y in (50,250) for z in (50,250)])
 cubo.Vertices(vertices)
 cubo.Aristas([(n,n+4) for n in range(0,4)]+[(n,n+1) for n in range(0,8,2)]+[(n,n+2) for n in (0,1,4,5)])
-pv = proyector(ANCHO_PANTALLA, ALTO_PANTALLA)
+
 pv.nuevoObjeto("cubo", cubo)
+
+prisma = Graph.Prisma([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (50, 100, 50))
+pv.nuevoObjeto("prisma", prisma)'''
+
+pv = proyector(ANCHO_PANTALLA, ALTO_PANTALLA)
+esfera = Graph.Esferoide([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (50, 50, 100))
+plano = Graph.PlanoHorizontal([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (400, 400), 50)
+"""pv.nuevoObjeto("Esfera", esfera)"""
+pv.nuevoObjeto("Plano", plano)
 print(pv)
 pv.dibPantalla()
 

@@ -17,10 +17,12 @@ from Vector3D_Class import Vector3D
 
 #Los objetos son grupos de vertices y aristas
 class Objeto3D:
-	#Constructor. Guarda una lista con los vertices y otra con las aristas. También guarda el número de aristas y el de vertices.
+	#Constructor. Guarda una lista con los vertices, otra con las aristas y otra con las caras. 
 	def __init__(self):
 		self.vertices = numpy.zeros((0, 4))
 		self.aristas = []
+		self.caras = []
+
 
 	#Representación en string de la clase. Para print y debuggear
 	def __repr__(self):
@@ -48,6 +50,20 @@ class Objeto3D:
 	#Coge una lista de indices de vertices y las convierte en aristas para añadir al objeto
 	def Aristas(self, listaAristas):
 		self.aristas += listaAristas
+
+	#Coge una lista de caras y su color y las añade a la lista de caras del objeto. La lista de caras es una lista de los vertices de cada cara.
+	def Caras(self, listaCaras, color = (255, 255, 255)):
+		#Cada lista de vertices es una cara
+		for listaVertices in listaCaras:
+			numVertices = len(listaVertices)
+			#Comprobamos que los identificadores de los vertices no sean mayores que el número de vertices.
+			if all((vertice < len(self.vertices) for vertice in listaVertices)):
+				#Añadimos las caras con su color
+				self.caras.append((listaVertices, numpy.array(color, numpy.uint8)))
+				#Añadimos las aristas de la cara
+				self.Aristas([(listaVertices[n-1], listaVertices[n]) for n in xrange(numVertices)])
+
+
 
 	#Aplicar una matriz de transformación
 	def Transformar(self, mat):
@@ -83,6 +99,54 @@ class Objeto3D:
 			#Mantenemos la distancia tomando el nuevo punto como centro
 			alineado = punto + dist
 			self.vertices[i] = [alineado.x, alineado.y, alineado.z, 1]
+
+#--------------------------------------------------------------#
+#					   Formas básicas                          #
+#--------------------------------------------------------------#
+
+#Vértices y aristas que crean las estructuras básicas
+	
+	#Prisma rectangular a partir de un punto y unas dimesniones.
+def Prisma((x, y, z), (ancho, alto, largo)):
+	Prisma = Objeto3D()
+	#Los vertices son el punto dado y todos los que salen al añadir las dimensiones
+	Prisma.Vertices(numpy.array([(nx, ny, nz) for nx in (x, x + ancho) for ny in (y, y + alto) for nz in (z, z + largo)]))
+
+	#Las caras son las formadas por los vertices en las listas. 
+	Prisma.Caras([(0,1,3,2), (7,5,4,6), (4,5,1,0), (2,3,7,6), (0,2,6,4), (5,7,3,1)])
+	return Prisma
+
+
+	#Esferoide a partir de un centro y unos semiejes (rx, ry, rz). El número de vertices viene dado por la resolución.
+def Esferoide((x, y, z), (rx, ry, rz), res = 15):
+	Esferoide = Objeto3D()
+	latitudes = [n*numpy.pi/res for n in xrange(1, res)]
+	longitudes = [n*2*numpy.pi/res for n in xrange(res)]
+
+	#Añadimos los vertices. Son los cruces que haya entre las latitudes y las longitudes.
+	Esferoide.Vertices([(x + rx*numpy.sin(n)*numpy.sin(m), y - ry*numpy.cos(m), z - rz*numpy.cos(n)*numpy.sin(m)) for m in latitudes for n in longitudes])
+
+	#Añadimos las caras menos en los polos
+	numVertices = res * (res - 1)
+	Esferoide.Caras([(m+n, (m+res)%numVertices+n, (m+res)%res**2+(n+1)%res, m+(n+1)%res) for n in xrange(res) for m in xrange(0,numVertices-res, res)])
+
+	#Añadimos los vertices y las caras triangulares de los polos
+	Esferoide.Vertices([(x, y+ry, z), (x, y-ry, z)])
+	Esferoide.Caras([(n, (n+1)%res, numVertices+1) for n in xrange(res)])
+	vertInicial = numVertices-res
+	Esferoide.Caras([(numVertices, vertInicial+(n+1)%res, vertInicial+n) for n in xrange(res)])
+
+	return Esferoide
+
+	#Plano horizontal. Centro en x, y, z. Dimensiones: dx, dz. Resolucion: Res
+def PlanoHorizontal((x,y,z), (dx,dz), Res):
+	grid = Objeto3D()
+	grid.Vertices([[x+n1*dx, y, z+n2*dz] for n1 in range(Res+1) for n2 in range(Res+1)])
+	grid.Aristas([(n1*(Res+1)+n2,n1*(Res+1)+n2+1) for n1 in range(Res+1) for n2 in range(Res)])
+	grid.Aristas([(n1*(Res+1)+n2,(n1+1)*(Res+1)+n2) for n1 in range(Res) for n2 in range(Res+1)])
+	return grid
+
+
 
 
 
