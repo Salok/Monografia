@@ -22,6 +22,7 @@ WORLDFLOOR = 0
 MASS_SPHERE = 1
 RADIUS_SPHERE = 50
 FRAME_TIME = 1/25
+COEFICIENTE_ELASTICO = 0.95
 
 
 
@@ -61,6 +62,15 @@ class Cuerpo:
 		self.Acelerar()
 		self.Mover()
 
+	#Funcion de choque. Intercambia los momentos lineales de los cuerpos que chocan con una pérdida de velocidad
+	def Choque(self, other):
+		vel = other.velocidad * other.masa / self.masa * COEFICIENTE_ELASTICO
+		otherVel = self.velocidad * self.masa / other.masa * COEFICIENTE_ELASTICO
+
+		return (vel, otherVel)
+
+
+
 
 
 
@@ -76,6 +86,16 @@ class Union:
 
 	def __repr__(self):
 		return 'Union entre los cuerpos %r y %r de longitud %r' % (self.inicio, self.final, self.longitud)
+
+
+
+
+
+
+
+
+
+
 
 #El sistema de objetos es la representación de cada uno de los individuos o conjuntos de objetos afectados por la física.
 class Sistema:
@@ -131,7 +151,16 @@ class Sistema:
 		for cuerpo in self.cuerpos.values():
 			cuerpo.Actualizar(fuerzaExt)
 
-
+	def Colision(self):
+		#Comprobamos si los cuerpos de un sistema están chocando y corregimos su posición si lo hacen.
+		for i, cuerpo1 in enumerate(self.cuerpos.values()):
+			for j, cuerpo2 in enumerate(self.cuerpos.calues()[i+1:])
+				distancia = Vector3D.Modulo(cuerpo1.posicion - cuerpo2.posicion) - cuerpo1.radio - cuerpo2.radio
+				if (distancia <= 0):
+					normDist = Vector3D.Normalizar(cuerpo1.posicion - cuerpo2.posicion)
+					cuerpo1.pos += distancia/2 * normDist
+					cuerpo2.pos -= distancia/2 * normDist
+					cuerpo1.velocidad, cuerpo2.velocidad = cuerpo1.Choque(cuerpo2)
 
 
 
@@ -140,6 +169,10 @@ class Sistema:
 
 class Mundo:
 
+	#Constructor
+	def __init__(self):
+
+	def __repr__(self):
 
 
 
