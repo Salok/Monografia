@@ -10,7 +10,10 @@ import numpy
 #Importamos los cuaterniones para rotar objetos
 from Quaternion_Class import Quaternion
 from Vector3D_Class import Vector3D
+import MatrizFunciones as matriz
+import WorldParams
 
+wp = WorldParams.WorldParams()
 #--------------------------------------------------------------#
 #					   Objeto3D class                          #
 #--------------------------------------------------------------#
@@ -101,6 +104,9 @@ class Objeto3D:
 			self.vertices[i] = [alineado.x, alineado.y, alineado.z, 1]
 
 
+#--------------------------------------------------------------#
+#					   Sistema3D class                         #
+#--------------------------------------------------------------#
 #Sistema de objetos. Todos los objetos de un sistema se consideran uno único al realizar las transformaciones
 class Sistema3D:
 	#Constructor
@@ -110,19 +116,55 @@ class Sistema3D:
 
 	#Representación en string de la clase. Para print y debuggear
 	def __repr__(self):
-		debug = 'Soy el sistema %r. Estoy compuesto por los objetos: \n' % (self.ID)
+		debug = 'Sistema %r. Estoy compuesto por los objetos: \n' % (self.ID)
 		for nombre, objeto in self.objetos.iteritems():
 			debug += ('Objeto %r: ' % (nombre) + Objeto3D.__repr__(objeto))
 			debug += '\n'
 
 		return debug
 
-	#Añadimos un nuevo objeto al sistema si no lo tenemos ya
+	#Añadimos un nuevo objeto al sistema
 	def nuevoObjeto(self, nombre, objeto):
-		if (nombre not in self.objetos.keys())
-			self.objetos[nombre] = objeto
+		self.objetos[nombre] = objeto
 
+	
+	#Funciones para transformar los objetos del sistema
+	def rotarObjetos(self, angulo, vector):
+		#Creamos el cuaternion de rotación.
+		rotacion = Quaternion()
+		rotacion.quatRotacion(angulo, vector)
 
+		#Aplicamos el cuaternion a a cada objeto
+		for objeto in self.objetos.values():
+			#Calculamos el centro del objeto antes de la rotación
+			centro = objeto.Centro()
+			objeto.Rotar(rotacion)
+
+			#Corregimos la traslacion provocada por la rotacion alineando con el centro anterior
+			objeto.Alinear(centro)
+
+	def trasladarObjetos(self, vector):
+		#Vector contiene las tres distancias. Usamos * para dividirlo al meterlo como argumento.
+		mat = matriz.Trasladar(*vector)
+		for objeto in self.objetos.values():
+			objeto.Transformar(mat)
+
+		#Escalar.
+	def escalarObjetos(self, f, centro):
+		mat = matriz.Escalar(f, *centro)
+		for objeto in self.objetos.values():
+			objeto.Transformar(mat)
+
+	#Centro del sistema
+	def Centro(self):
+		centros = numpy.zeros((0,3))
+		for objeto in self.objetos.values():
+			centros = numpy.vstack((centros, objeto.Centro()))
+
+		minC = centros.min(axis = 0)
+		maxC = centros.max(axis = 0)
+
+		return (minC + maxC) * 0.5
 
 
 #--------------------------------------------------------------#

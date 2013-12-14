@@ -12,24 +12,16 @@ from Quaternion_Class import Quaternion
 from Vector3D_Class import Vector3D
 import Graphics_Class as Graph
 import MatrizFunciones as matriz
+import WorldParams
 
-#Parametros para WorldParams
-NEGRO = (0, 0, 0)
-BLANCO = (255, 255, 255)
-DIBUJAR_VERTICES = False
-DIBUJAR_ARISTAS = True
-COLOR_VERTICES = (255, 255, 255)
-COLOR_ARISTAS = (200, 200, 200)
-RADIO_VERTICES = 5
-ANCHO_PANTALLA = 600
-ALTO_PANTALLA = 450
+wp = WorldParams.WorldParams()
 
 #--------------------------------------------------------------#
 #					   Proyector class                         #
 #--------------------------------------------------------------#
 
 #Clase que guarda los objetos y tiene todas las variables necesarias para dibujarlos
-class proyector:
+class Proyector:
 	#Constructor
 	def __init__(self, xmax, ymax):
 		#Tamaño de la pantalla
@@ -39,17 +31,20 @@ class proyector:
 		#Pantalla de pygame
 		self.pantalla = pygame.display.set_mode((xmax, ymax))
 		pygame.display.set_caption('Proyector3D')
-		self.colorFondo = NEGRO 
+		self.colorFondo = wp.NEGRO 
 
 		#Diccionario con los objetos
-		self.objetos = {}
+		self.sistemas = {}
+
+		#Sistema sobre el que se aplican las transformaciones
+		self.sistElegido = '1'
 
 		#Condiciones de dibujo
-		self.dibVertices = DIBUJAR_VERTICES
-		self.dibAristas = DIBUJAR_ARISTAS
-		self.colorVertices = COLOR_VERTICES
-		self.colorAristas = COLOR_ARISTAS
-		self.radioVertices = RADIO_VERTICES
+		self.dibVertices = wp.DIBUJAR_VERTICES
+		self.dibAristas = wp.DIBUJAR_ARISTAS
+		self.colorVertices = wp.COLOR_VERTICES
+		self.colorAristas = wp.COLOR_ARISTAS
+		self.radioVertices = wp.RADIO_VERTICES
 
 	def __repr__(self):
 		debug = 'Mi pantalla es de %r de ancho y %r de alto. \n El color de fondo es %r. \n El color de las aristas es: %r. \n' % (self.xMax, self.yMax, self.colorFondo, self.colorAristas )
@@ -78,63 +73,47 @@ class proyector:
 			self.dibObjetos()
 			pygame.display.flip()
 
-	#Añadimos un nuevo objeto con nombre para poder tratarlo individualmente.
-	def nuevoObjeto(self, nombre, objeto):
-		if(nombre not in self.objetos.keys())
-				self.objetos[nombre] = objeto
-
-	#Añadimos los objetos de un sistema de objetos
+	#Añadimos un nuevo sistema de objeto con nombre para poder tratarlo individualmente.
 	def nuevoSisObjetos(self, sistema):
-		for nombre, objeto in sistema.objetos.itervalues():
-			self.nuevoObjeto(nombre, objeto)
+		self.sistemas[sistema.ID] = sistema
+
 
 
 	#Funcion que dibuja los objetos del diccionario
 	def dibObjetos(self):
-		#Por cada objeto en el pryector
-		for objeto in self.objetos.values():	
-			#Si dibujamos los vertices...
-			if self.dibVertices:
-				# Por cada vertices
-				for vertice in objeto.vertices:
-					#Lo dibujamos en sus coordenadas en x e y
-					pygame.draw.circle(self.pantalla, self.colorVertices, (int(vertice[0]), int(vertice[1])), self.radioVertices, 0)
+		#Por cada sistema en el proyector
+		for sistema in self.sistemas.values():
+		#Si dibujamos los vertices...
+			for objeto in sistema.objetos.values():
+				if self.dibVertices:
+					# Por cada vertices
+					for vertice in objeto.vertices:
+						#Lo dibujamos en sus coordenadas en x e y
+						pygame.draw.circle(self.pantalla, self.colorVertices, (int(vertice[0]), int(vertice[1])), self.radioVertices, 0)
 
-			#Si dibujamos las aristas...
-			if self.dibAristas:
-				#Por cada arista
-				for ver1, ver2 in objeto.aristas:
-					#Dibujamos una línea entre su inicio y su final
-					pygame.draw.aaline(self.pantalla, self.colorAristas, objeto.vertices[ver1][:2], objeto.vertices[ver2][:2], 1)
+				#Si dibujamos las aristas...
+				if self.dibAristas:
+					#Por cada arista
+					for ver1, ver2 in objeto.aristas:
+						#Dibujamos una línea entre su inicio y su final
+						pygame.draw.aaline(self.pantalla, self.colorAristas, objeto.vertices[ver1][:2], objeto.vertices[ver2][:2], 1)
 
-	#Funciones de transformación globales. Transofrman todos los objetos del proyector
+	#Funciones de transformación globales. Transforman todos los objetos del proyector
 		#Trasladar.
-	def trasladarObjetos(self, vector):
+	def trasladarSistema(self, vector):
 		#Vector contiene las tres distancias. Usamos * para dividirlo al meterlo como argumento.
-		mat = matriz.Trasladar(*vector)
-		for objeto in self.objetos.values():
-			objeto.Transformar(mat)
+		self.sistemas[self.sistElegido].trasladarObjetos(vector)
 
 		#Escalar.
-	def escalarObjetos(self, f, centro):
-		mat = matriz.Escalar(f, *centro)
-		for objeto in self.objetos.values():
-			objeto.Transformar(mat)
+	def escalarSistema(self, f, centro):
+		self.sistemas[self.sistElegido].escalarObjetos(f, centro)
 
 		#Rotar
-	def rotarObjetos(self, angulo, vector):
-		#Creamos el cuaternion de rotación.
-		rotacion = Quaternion()
-		rotacion.quatRotacion(angulo, vector)
+	def rotarSistema(self, angulo, vector):
+		self.sistemas[self.sistElegido].rotarObjetos(angulo, vector)
 
-		#Aplicamos el cuaternion a a cada objeto
-		for objeto in self.objetos.values():
-			#Calculamos el centro del objeto antes de la rotación
-			centro = objeto.Centro()
-			objeto.Rotar(rotacion)
-
-			#Corregimos la traslacion provocada por la rotacion alineando con el centro anterior
-			objeto.Alinear(centro)
+	def elegirSistema(self, ID):
+		self.sistElegido = ID
 
 
 
@@ -142,37 +121,21 @@ class proyector:
 #Test: Cube
 #Test: Transformations
 key_to_function = {
-	pygame.K_LEFT: (lambda x: x.trasladarObjetos([-10, 0, 0])),
-	pygame.K_RIGHT:(lambda x: x.trasladarObjetos([ 10, 0, 0])),
-	pygame.K_DOWN: (lambda x: x.trasladarObjetos([0,  10, 0])),
-	pygame.K_UP:   (lambda x: x.trasladarObjetos([0, -10, 0])),
-	pygame.K_q:    (lambda x: x.escalarObjetos(2, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
- 	pygame.K_e:    (lambda x: x.escalarObjetos(0.5, [ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0])),
- 	pygame.K_a:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
- 	pygame.K_s:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
- 	pygame.K_d:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1))),
- 	 pygame.K_z:	   (lambda x: x.rotarObjetos(numpy.pi/4, (1,0,0))),
- 	pygame.K_x:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,1,0))),
- 	pygame.K_c:	   (lambda x: x.rotarObjetos(numpy.pi/4, (0,0,1)))
+	pygame.K_LEFT: 	(lambda x: x.trasladarSistema([-10, 0, 0])),
+	pygame.K_RIGHT:	(lambda x: x.trasladarSistema([ 10, 0, 0])),
+	pygame.K_DOWN: 	(lambda x: x.trasladarSistema([0,  10, 0])),
+	pygame.K_UP:   	(lambda x: x.trasladarSistema([0, -10, 0])),
+	pygame.K_q:    	(lambda x: x.escalarSistema(2, [wp.ANCHO_PANTALLA/2, wp.ALTO_PANTALLA/2, 0])),
+ 	pygame.K_e:    	(lambda x: x.escalarSistema(0.5, [wp.ANCHO_PANTALLA/2, wp.ALTO_PANTALLA/2, 0])),
+ 	pygame.K_a:	   	(lambda x: x.rotarSistema(numpy.pi/4, (1,0,0))),
+ 	pygame.K_s:	   	(lambda x: x.rotarSistema(numpy.pi/4, (0,1,0))),
+ 	pygame.K_d:	   	(lambda x: x.rotarSistema(numpy.pi/4, (0,0,1))),
+ 	 pygame.K_z:	(lambda x: x.rotarSistema(numpy.pi/4, (1,0,0))),
+ 	pygame.K_x:	   	(lambda x: x.rotarSistema(numpy.pi/4, (0,1,0))),
+ 	pygame.K_c:	   	(lambda x: x.rotarSistema(numpy.pi/4, (0,0,1))),
+ 	pygame.K_1:		(lambda x: x.elegirSistema('1')),
+ 	pygame.K_2:		(lambda x: x.elegirSistema('2'))
  }
-
-'''cubo = Graph.Objeto3D()
-vertices = numpy.array([(x,y,z) for x in (50,250) for y in (50,250) for z in (50,250)])
-cubo.Vertices(vertices)
-cubo.Aristas([(n,n+4) for n in range(0,4)]+[(n,n+1) for n in range(0,8,2)]+[(n,n+2) for n in (0,1,4,5)])
-
-pv.nuevoObjeto("cubo", cubo)
-
-prisma = Graph.Prisma([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (50, 100, 50))
-pv.nuevoObjeto("prisma", prisma)'''
-
-pv = proyector(ANCHO_PANTALLA, ALTO_PANTALLA)
-esfera = Graph.Esferoide([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (50, 50, 100))
-plano = Graph.PlanoHorizontal([ANCHO_PANTALLA/2, ALTO_PANTALLA/2, 0], (400, 400), 50)
-"""pv.nuevoObjeto("Esfera", esfera)"""
-pv.nuevoObjeto("Plano", plano)
-print(pv)
-pv.dibPantalla()
 
 
 
